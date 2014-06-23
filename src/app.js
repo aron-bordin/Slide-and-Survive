@@ -3,7 +3,7 @@ var Objs = {
     Enemies: [],
     Square: null,
     Title: null,
-    gameTitle: null,
+    gameTime: null,
     gameTimeInfo: null,
     gameTimeTotal: null,
     gameBestInfo: null,
@@ -18,10 +18,46 @@ function moveSquare(destination){
     if((destination.x > 0 ) && (destination.x < size.width))
         if((destination.y > 0) && (destination.y < size.height))
             Objs.Square.setPosition(destination);
-
 }
 
+function gameStart(){
+    isAlive = true;
+    timePlayed = 0;
+    Objs.Title.setVisible(false);
+    Objs.gameTimeInfo.setVisible(false);
+    Objs.gameTimeTotal.setVisible(false);
+    Objs.gameBestInfo.setVisible(false);
+    Objs.gameBestValue.setVisible(false);
+    Objs.gameInfo1.setVisible(false);
+    Objs.gameInfo2.setVisible(false);
+}
 
+function gameOver(){
+    isAlive = false;
+    Objs.Title.setVisible(true);
+    Objs.gameTimeInfo.setVisible(true);
+    Objs.gameTimeTotal.setVisible(true);
+    Objs.gameBestInfo.setVisible(true);
+    Objs.gameBestValue.setVisible(true);
+    Objs.gameInfo1.setVisible(true);
+    Objs.gameInfo2.setVisible(true);
+
+    Objs.gameTimeTotal.setString(timePlayed.toFixed(3));
+
+    Objs.Square.setPosition(cc.p(400, 225));
+    Objs.Enemies[0].setPosition(cc.p(100, 100));
+    Objs.Enemies[1].setPosition(cc.p(700, 100));
+    Objs.Enemies[2].setPosition(cc.p(700, 350));
+    Objs.Enemies[3].setPosition(cc.p(100, 350));
+
+    var bestTime = parseFloat(Objs.gameBestValue.getString());
+    if(timePlayed > bestTime){
+        localStorage.setItem("bestTime", timePlayed);
+        Objs.gameBestValue.setString(timePlayed.toFixed(3));
+    }
+
+
+}
 var GameLayer = cc.Layer.extend({
     ctor:function () {
         // 1. super init first
@@ -49,9 +85,43 @@ var GameLayer = cc.Layer.extend({
         if(!isAlive)
             return;
         timePlayed += dt;
-        
+        Objs.gameTime.setString(timePlayed.toFixed(3));
+
+        var size = cc.director.getWinSize();
+
+        for(var i = 0; i < 4; i++){
+            var pos = Objs.Enemies[i].getPosition();
+
+            if((pos.x <= 0) || (pos.x >= size.width))
+                Objs.EnemiesDirection[i] = cc.p(Objs.EnemiesDirection[i].x * -1, Objs.EnemiesDirection[i].y)
+            if((pos.y <= 0) || (pos.y >= size.height))
+                Objs.EnemiesDirection[i] = cc.p(Objs.EnemiesDirection[i].x, Objs.EnemiesDirection[i].y * -1)
+            Objs.Enemies[i].setPosition(cc.pAdd(Objs.EnemiesDirection[i], pos));
+
+        }
+        this.checkCollision();
 
     },
+
+    checkCollision: function(){
+        var rectHero = cc.rect(Objs.Square.getPositionX() - Objs.Square.getContentSize().width/2*Objs.Square.getScaleX(),
+                Objs.Square.getPositionY() - Objs.Square.getContentSize().height/2*Objs.Square.getScaleY(),
+                Objs.Square.getContentSize().width*Objs.Square.getScaleX(),
+                Objs.Square.getContentSize().height*Objs.Square.getScaleY());
+
+        for(var i =0; i < 4; i++){
+            var rectEnemy = cc.rect(Objs.Enemies[i].getPositionX() - Objs.Enemies[i].getContentSize().width/2*Objs.Enemies[i].getScaleX(),
+                    Objs.Enemies[i].getPositionY() - Objs.Enemies[i].getContentSize().height/2*Objs.Enemies[i].getScaleY(),
+                    Objs.Enemies[i].getContentSize().width*Objs.Enemies[i].getScaleX(),
+                    Objs.Enemies[i].getContentSize().height*Objs.Enemies[i].getScaleY());
+            if(cc.rectIntersectsRect(rectHero, rectEnemy)) {
+                gameOver();
+                return;
+            }
+        }
+
+    },
+
     onTouchBegan: function(touch, event){
         var target = event.getCurrentTarget();
         var PosInScreen = target.convertToNodeSpace(touch.getLocation());
@@ -62,7 +132,7 @@ var GameLayer = cc.Layer.extend({
             switch(target.getTag()){
                 case 1:
                     if(!isAlive){
-                        isAlive = true;
+                        gameStart();
                         moveSquare(cc.p(400, 225));
                     }
                     return true;
@@ -92,6 +162,7 @@ var GameLayer = cc.Layer.extend({
     },
 
     addTexts: function(){
+        var bestTime = localStorage.getItem("bestTime");
         Objs.Title = cc.LabelTTF.create("Slide & Survive", res.TitleFont, 40);
         Objs.Title.setPosition(cc.p(400, 350));
         this.addChild(Objs.Title);
@@ -101,7 +172,7 @@ var GameLayer = cc.Layer.extend({
         this.addChild(Objs.gameTime);
 
         Objs.gameTimeInfo = cc.LabelTTF.create("Time: ", res.TitleFont, 26);
-        Objs.gameTimeInfo.setPosition(cc.p(230, 225));
+        Objs.gameTimeInfo.setPosition(cc.p(200, 225));
         this.addChild(Objs.gameTimeInfo);
 
         Objs.gameTimeTotal = cc.LabelTTF.create("0.000", res.TitleFont, 26);
@@ -112,7 +183,7 @@ var GameLayer = cc.Layer.extend({
         Objs.gameBestInfo.setPosition(cc.p(540, 225));
         this.addChild(Objs.gameBestInfo);
 
-        Objs.gameBestValue = cc.LabelTTF.create("0.000", res.TitleFont, 26);
+        Objs.gameBestValue = cc.LabelTTF.create(bestTime ? parseFloat(bestTime).toFixed(3) : "0.000", res.TitleFont, 26);
         Objs.gameBestValue.setPosition(cc.p(640, 225));
         this.addChild(Objs.gameBestValue);
 
