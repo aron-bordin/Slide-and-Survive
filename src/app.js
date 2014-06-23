@@ -1,4 +1,4 @@
-var Objs = {
+var Objs = { //global objects
     EnemiesDirection: [],
     Enemies: [],
     Square: null,
@@ -11,16 +11,16 @@ var Objs = {
     gameInfo1: null,
     gameInfo2: null}
 
-var timePlayed = 0;
-var isAlive = false;
-function moveSquare(destination){
+var timePlayed = 0; //game time
+var isAlive = false; //is the game is running
+function moveSquare(destination){ //move the green square to destination
     var size = cc.director.getWinSize();
-    if((destination.x > 0 ) && (destination.x < size.width))
+    if((destination.x > 0 ) && (destination.x < size.width)) //check if square is inside the screen
         if((destination.y > 0) && (destination.y < size.height))
-            Objs.Square.setPosition(destination);
+            Objs.Square.setPosition(destination); //if ok, move it
 }
 
-function gameStart(){
+function gameStart(){//game start, hide texts
     isAlive = true;
     timePlayed = 0;
     Objs.Title.setVisible(false);
@@ -32,7 +32,7 @@ function gameStart(){
     Objs.gameInfo2.setVisible(false);
 }
 
-function gameOver(){
+function gameOver(){//game over, check score
     isAlive = false;
     Objs.Title.setVisible(true);
     Objs.gameTimeInfo.setVisible(true);
@@ -44,96 +44,99 @@ function gameOver(){
 
     Objs.gameTimeTotal.setString(timePlayed.toFixed(3));
 
-    Objs.Square.setPosition(cc.p(400, 225));
+    Objs.Square.setPosition(cc.p(400, 225));//move enemies to default location
     Objs.Enemies[0].setPosition(cc.p(100, 100));
     Objs.Enemies[1].setPosition(cc.p(700, 100));
     Objs.Enemies[2].setPosition(cc.p(700, 350));
     Objs.Enemies[3].setPosition(cc.p(100, 350));
 
-    var bestTime = parseFloat(Objs.gameBestValue.getString());
-    if(timePlayed > bestTime){
-        localStorage.setItem("bestTime", timePlayed);
-        Objs.gameBestValue.setString(timePlayed.toFixed(3));
+    var bestTime = parseFloat(Objs.gameBestValue.getString()); //get best time
+    if(timePlayed > bestTime){ //check the game time
+        localStorage.setItem("bestTime", timePlayed); //if is a new best time, save it
+        Objs.gameBestValue.setString(timePlayed.toFixed(3)); //and show it
     }
 
 
 }
-var GameLayer = cc.Layer.extend({
+var GameLayer = cc.Layer.extend({//main scene
     ctor:function () {
         // 1. super init first
         this._super();
 
-        var eventListener = cc.EventListener.create({
-            event: cc.EventListener.TOUCH_ONE_BY_ONE,
-            swallowTouches: true,
-            onTouchBegan: this.onTouchBegan,
+        var eventListener = cc.EventListener.create({//event listener
+            event: cc.EventListener.TOUCH_ONE_BY_ONE, //one click
+            swallowTouches: true, //is onTouch return true, stop event propagation
+            onTouchBegan: this.onTouchBegan, //callbacks
             onTouchMoved: this.onTouchMoved});
 
-        this.addSquares();
-        this.addTexts();
+        this.addSquares();//add enemies square
+        this.addTexts(); //add texts
 
-        cc.eventManager.addListener(eventListener, Objs.Square);
+        cc.eventManager.addListener(eventListener, Objs.Square);//start the event listener
 
         for(var i = 0; i < 4; i++)
-            Objs.EnemiesDirection[i] = this.generateDirection();
+            Objs.EnemiesDirection[i] = this.generateDirection();//generate a random movement direction
 
-        this.scheduleUpdate();
+        this.scheduleUpdate();//runs update() every frame
         return true;
     },
 
-    update: function(dt){
-        if(!isAlive)
+    update: function(dt){//update callback, run every frame
+        if(!isAlive)//if is not running, stop
             return;
-        timePlayed += dt;
-        Objs.gameTime.setString(timePlayed.toFixed(3));
+        timePlayed += dt; //add dt to game time
+        Objs.gameTime.setString(timePlayed.toFixed(3));//update game time label
 
-        var size = cc.director.getWinSize();
+        var size = cc.director.getWinSize();//get win size
 
-        for(var i = 0; i < 4; i++){
+        for(var i = 0; i < 4; i++){//move the enemies
             var pos = Objs.Enemies[i].getPosition();
 
-            if((pos.x <= 0) || (pos.x >= size.width))
+            if((pos.x <= 0) || (pos.x >= size.width))//the enemy position will be relative with his direction rect
                 Objs.EnemiesDirection[i] = cc.p(Objs.EnemiesDirection[i].x * -1, Objs.EnemiesDirection[i].y)
             if((pos.y <= 0) || (pos.y >= size.height))
                 Objs.EnemiesDirection[i] = cc.p(Objs.EnemiesDirection[i].x, Objs.EnemiesDirection[i].y * -1)
             Objs.Enemies[i].setPosition(cc.pAdd(Objs.EnemiesDirection[i], pos));
 
         }
-        this.checkCollision();
+        this.checkCollision();//check collisionss
 
     },
 
     checkCollision: function(){
+        //create a rect to represent our green square
         var rectHero = cc.rect(Objs.Square.getPositionX() - Objs.Square.getContentSize().width/2*Objs.Square.getScaleX(),
                 Objs.Square.getPositionY() - Objs.Square.getContentSize().height/2*Objs.Square.getScaleY(),
                 Objs.Square.getContentSize().width*Objs.Square.getScaleX(),
                 Objs.Square.getContentSize().height*Objs.Square.getScaleY());
 
         for(var i =0; i < 4; i++){
+            //create a rect for each enemy
             var rectEnemy = cc.rect(Objs.Enemies[i].getPositionX() - Objs.Enemies[i].getContentSize().width/2*Objs.Enemies[i].getScaleX(),
                     Objs.Enemies[i].getPositionY() - Objs.Enemies[i].getContentSize().height/2*Objs.Enemies[i].getScaleY(),
                     Objs.Enemies[i].getContentSize().width*Objs.Enemies[i].getScaleX(),
                     Objs.Enemies[i].getContentSize().height*Objs.Enemies[i].getScaleY());
-            if(cc.rectIntersectsRect(rectHero, rectEnemy)) {
-                gameOver();
+            if(cc.rectIntersectsRect(rectHero, rectEnemy)) {//check collision
+                gameOver();//if ok, gameover
                 return;
             }
         }
 
     },
 
-    onTouchBegan: function(touch, event){
+    onTouchBegan: function(touch, event){//touchbegan callback
+
         var target = event.getCurrentTarget();
         var PosInScreen = target.convertToNodeSpace(touch.getLocation());
         var Size = target.getContentSize();
         var rect = cc.rect(0, 0, Size.width, Size.height);
 
-        if(cc.rectContainsPoint(rect, PosInScreen)){
+        if(cc.rectContainsPoint(rect, PosInScreen)){ //check if i'm clicking in the green square
             switch(target.getTag()){
                 case 1:
-                    if(!isAlive){
-                        gameStart();
-                        moveSquare(cc.p(400, 225));
+                    if(!isAlive){//if the game is not running
+                        gameStart();//start it
+                        moveSquare(cc.p(400, 225));//make sure to start the game at the center of the screen
                     }
                     return true;
             }
@@ -141,19 +144,18 @@ var GameLayer = cc.Layer.extend({
         return false;
     },
 
-    onTouchMoved: function(touch, event){
+    onTouchMoved: function(touch, event){//touchmoved callback
         var target = event.getCurrentTarget();
         var PosInScreen = target.convertToNodeSpace(touch.getLocation());
         var Size = target.getContentSize();
         var rect = cc.rect(0, 0, Size.width, Size.height);
-        if(!isAlive)
+        if(!isAlive)//if is not running, go away
             return;
 
-
-        if(cc.rectContainsPoint(rect, PosInScreen)){
+        if(cc.rectContainsPoint(rect, PosInScreen)){//check if clicked in the green square
             switch(target.getTag()){
                 case 1:
-                    moveSquare(touch._point);
+                    moveSquare(touch._point);//move the square
                     return true;
             }
         }
@@ -161,8 +163,8 @@ var GameLayer = cc.Layer.extend({
 
     },
 
-    addTexts: function(){
-        var bestTime = localStorage.getItem("bestTime");
+    addTexts: function(){//add the texts to the screen
+        var bestTime = localStorage.getItem("bestTime");//load the best time from localStorage
         Objs.Title = cc.LabelTTF.create("Slide & Survive", res.TitleFont, 40);
         Objs.Title.setPosition(cc.p(400, 350));
         this.addChild(Objs.Title);
@@ -183,6 +185,7 @@ var GameLayer = cc.Layer.extend({
         Objs.gameBestInfo.setPosition(cc.p(540, 225));
         this.addChild(Objs.gameBestInfo);
 
+        //check if there is a bestTime, if not set the default as 0
         Objs.gameBestValue = cc.LabelTTF.create(bestTime ? parseFloat(bestTime).toFixed(3) : "0.000", res.TitleFont, 26);
         Objs.gameBestValue.setPosition(cc.p(650, 225));
         this.addChild(Objs.gameBestValue);
@@ -199,7 +202,7 @@ var GameLayer = cc.Layer.extend({
 
     },
 
-    addSquares: function(){
+    addSquares: function(){//add the squares to the scene
         Objs.Square = cc.Sprite.create(res.Square_png);
         Objs.Square.setPosition(cc.p(400,225));
         Objs.Square.setTag(1);
@@ -228,7 +231,7 @@ var GameLayer = cc.Layer.extend({
 
     },
 
-    generateDirection: function(){
+    generateDirection: function(){//generate a random direction
         var i = Math.floor((Math.random() * 3));
         var v = 7;
         switch (i){
@@ -245,7 +248,7 @@ var GameLayer = cc.Layer.extend({
     }
 });
 
-var GameScene = cc.Scene.extend({
+var GameScene = cc.Scene.extend({//create the scene and start the game
     onEnter:function () {
         this._super();
         var layer = new GameLayer();
