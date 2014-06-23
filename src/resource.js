@@ -1,22 +1,13 @@
 var res = {
-    HelloWorld_png : "res/HelloWorld.png",
-    CloseNormal_png : "res/CloseNormal.png",
-    CloseSelected_png : "res/CloseSelected.png"
+    Square_png : "res/bloco.png",
+    Enemy_png : "res/inimigo.png",
+    TitleFont: "res/fonts/Marker Felt.ttf"
+
 };
 
 var g_resources = [
-    //image
-    res.HelloWorld_png,
-    res.CloseNormal_png,
-    res.CloseSelected_png
+    res.Square_png,
+    res.Enemy_png,
+    res.TitleFont
 
-    //plist
-
-    //fnt
-
-    //tmx
-
-    //bgm
-
-    //effect
 ];
