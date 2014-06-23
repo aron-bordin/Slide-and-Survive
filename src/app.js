@@ -184,7 +184,7 @@ var GameLayer = cc.Layer.extend({
         this.addChild(Objs.gameBestInfo);
 
         Objs.gameBestValue = cc.LabelTTF.create(bestTime ? parseFloat(bestTime).toFixed(3) : "0.000", res.TitleFont, 26);
-        Objs.gameBestValue.setPosition(cc.p(640, 225));
+        Objs.gameBestValue.setPosition(cc.p(650, 225));
         this.addChild(Objs.gameBestValue);
 
         Objs.gameInfo1 = cc.LabelTTF.create("Move the green square avoiding contact with the red ones!",
