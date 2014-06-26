@@ -9,7 +9,9 @@ var Objs = { //global objects
     gameBestInfo: null,
     gameBestValue: null,
     gameInfo1: null,
-    gameInfo2: null}
+    gameInfo2: null,
+    soundInfo: null
+}
 
 var timePlayed = 0; //game time
 var isAlive = false; //is the game is running
@@ -76,6 +78,9 @@ var GameLayer = cc.Layer.extend({//main scene
 
         for(var i = 0; i < 4; i++)
             Objs.EnemiesDirection[i] = this.generateDirection();//generate a random movement direction
+
+
+
 
         this.scheduleUpdate();//runs update() every frame
         return true;
@@ -199,6 +204,36 @@ var GameLayer = cc.Layer.extend({//main scene
             res.TitleFont, 20);
         Objs.gameInfo2.setPosition(cc.p(440, 290));
         this.addChild(Objs.gameInfo2);
+
+        var useSound = localStorage.getItem("Sound");
+        if(useSound == 1) {
+            cc.audioEngine.playMusic(res.Music, true);
+        } else {
+            if(useSound != 0) {
+                localStorage.setItem("Sound", 1);
+                useSound = 1;
+            }
+        }
+        Objs.soundInfo = cc.MenuItemFont.create(useSound == 1 ? "Disable sound" : "Enable Sound", this.SoundClicked, this);
+        Objs.soundInfo.setFontSize(20);
+
+        var Menu = cc.Menu.create(Objs.soundInfo);
+        Menu.setPosition(680, 20);
+        this.addChild(Menu);
+
+    },
+
+    SoundClicked: function(){
+        var enabled = localStorage.getItem("Sound");
+        if(enabled == 1){
+            cc.audioEngine.stopMusic(true);
+            localStorage.setItem("Sound", 0);
+            Objs.soundInfo.setString("Enable sound");
+        } else {
+            cc.audioEngine.playMusic(res.Music, true);
+            localStorage.setItem("Sound", 1);
+            Objs.soundInfo.setString("Disable sound");
+        }
 
     },
 
