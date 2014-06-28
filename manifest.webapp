@@ -1,0 +1,19 @@
+{
+  "version": "0.1",
+  "name": "Slide and Survive",
+  "description": "Just move the green square and try to escape from the red ones. ",
+  "launch_path": "/index.html",
+  "icons": {
+    "16": "/res/icon.png",
+    "48": "/res/icon.png",
+    "128": "/res/icon.png"
+  },
+  "developer": {
+    "name": "Aron Bordin",
+    "url": "http://bytedebugger.wordpress.com"
+  },
+  "default_locale": "en",
+  "installs_allowed_from": ["*"],
+  "orientation": "landscape"
+  
+}
