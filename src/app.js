@@ -57,8 +57,6 @@ function gameOver(){//game over, check score
         localStorage.setItem("bestTime", timePlayed); //if is a new best time, save it
         Objs.gameBestValue.setString(timePlayed.toFixed(3)); //and show it
     }
-
-
 }
 var GameLayer = cc.Layer.extend({//main scene
     ctor:function () {
