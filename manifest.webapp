@@ -1,11 +1,9 @@
 {
-  "version": "0.1",
+  "version": "1.0",
   "name": "Slide and Survive",
-  "description": "Just move the green square and try to escape from the red ones. ",
+  "description": "Just move the green square and try to escape from the red ones. This game was created in a HTML5 tutorial, read more here: http://bytedebugger.wordpress.com/2014/06/28/tutorial-html5-game-development-with-cocos2d-js-firefox-os/",
   "launch_path": "/index.html",
   "icons": {
-    "16": "/res/icon.png",
-    "48": "/res/icon.png",
     "128": "/res/icon.png"
   },
   "developer": {
@@ -13,7 +11,8 @@
     "url": "http://bytedebugger.wordpress.com"
   },
   "default_locale": "en",
-  "installs_allowed_from": ["*"],
+  "installs_allowed_from": [
+    "*"
+  ],
   "orientation": "landscape"
-  
 }
