@@ -77,11 +77,8 @@ var GameLayer = cc.Layer.extend({//main scene
         for(var i = 0; i < 4; i++)
             Objs.EnemiesDirection[i] = this.generateDirection();//generate a random movement direction
 
-
-
-
         this.scheduleUpdate();//runs update() every frame
-        return true;
+        
     },
 
     update: function(dt){//update callback, run every frame
